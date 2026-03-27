@@ -17,11 +17,11 @@ SECRET_KEY = os.environ.get(
 # Debug mode - production mein False hona chahiye
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-# Allowed hosts - Railway ka domain aur localhost dono allow karo
+# Allowed hosts - Render ka domain aur localhost dono allow karo
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-RAILWAY_HOST = os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
-if RAILWAY_HOST:
-    ALLOWED_HOSTS.append(RAILWAY_HOST)
+RENDER_HOST = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '')
+if RENDER_HOST:
+    ALLOWED_HOSTS.append(RENDER_HOST)
 
 # Application definition
 INSTALLED_APPS = [
