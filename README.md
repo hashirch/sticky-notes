@@ -152,6 +152,6 @@ Open your browser and go to: **http://127.0.0.1:8000/**
 
 ## Submission Info
 
-- Student: [Your Name]
-- Roll Number: [Your Roll Number]
-- Assignment: Sticky Notes Django App
+- Student: Muhammad Hashir
+- Roll Number: 22P9181
+- Assignment: Assignment 2
