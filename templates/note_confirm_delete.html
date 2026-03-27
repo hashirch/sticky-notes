@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Note{% endblock %}
+
+{% block content %}
+<style>
+    /* ===== DELETE CONFIRMATION PAGE ===== */
+    .delete-page {
+        max-width: 480px;
+        margin: 60px auto 0;
+        text-align: center;
+    }
+
+    /* Warning icon circle -->
+    .delete-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--danger-light);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .delete-title {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .delete-subtitle {
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+        line-height: 1.5;
+    }
+
+    /* Note preview card - jis note ko delete karna hai uska preview -->
+    .note-preview {
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin-bottom: 28px;
+        text-align: left;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .note-preview-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: rgba(0,0,0,0.75);
+        margin-bottom: 6px;
+    }
+
+    .note-preview-body {
+        font-size: 13px;
+        color: rgba(0,0,0,0.5);
+        line-height: 1.5;
+        /* Zyada lambi content clip karo -->
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Action buttons row -->
+    .delete-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+</style>
+
+<div class="delete-page">
+
+    <!-- Warning icon -->
+    <div class="delete-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M6 8h16M10 8V6.5A1.5 1.5 0 0111.5 5h5A1.5 1.5 0 0118 6.5V8M11 12v7M17 12v7" stroke="#ff3b30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M7 8l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14" stroke="#ff3b30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <h1 class="delete-title">Delete this note?</h1>
+    <p class="delete-subtitle">This action cannot be undone. The note will be permanently removed.</p>
+
+    <!-- Note preview - user ko confirm karne mein help karta hai -->
+    <div class="note-preview" style="background-color: {{ note.color }};">
+        <div class="note-preview-title">{{ note.title }}</div>
+        {% if note.content %}
+            <div class="note-preview-body">{{ note.content }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Confirm delete form -->
+    <div class="delete-actions">
+        <a href="{% url 'note_list' %}" class="btn btn-ghost">Cancel</a>
+        <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Note</button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

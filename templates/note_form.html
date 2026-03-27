@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if action == 'Edit' %}Edit Note{% else %}New Note{% endif %}{% endblock %}
+
+{% block content %}
+<style>
+    /* ===== FORM PAGE LAYOUT ===== */
+    .form-page {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        margin-bottom: 32px;
+    }
+
+    .form-page-title {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+    }
+
+    .form-page-subtitle {
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    /* ===== FORM CARD ===== */
+    .form-card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        overflow: hidden;
+        transition: background var(--transition);
+    }
+
+    .form-card-body { padding: 32px; }
+
+    /* ===== COLOR SECTION ===== */
+    .color-section {
+        background: var(--surface-secondary);
+        border-top: 1px solid var(--border);
+        padding: 20px 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .color-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    /* Color swatch buttons - quick select -->
+    .color-swatches {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .color-swatch {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+        outline: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .color-swatch:hover { transform: scale(1.2); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    .color-swatch.active { border-color: var(--text-primary); transform: scale(1.15); }
+
+    /* Hidden color picker input -->
+    .color-picker-input {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid var(--border-strong);
+        cursor: pointer;
+        padding: 0;
+        background: none;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: transform var(--transition);
+    }
+
+    .color-picker-input:hover { transform: scale(1.1); }
+
+    /* ===== FORM ACTIONS ===== */
+    .form-actions {
+        padding: 20px 32px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    /* ===== CHAR COUNTER ===== */
+    .char-counter {
+        font-size: 12px;
+        color: var(--text-tertiary);
+        text-align: right;
+        margin-top: 6px;
+        transition: color var(--transition);
+    }
+
+    .char-counter.warning { color: #ff9500; }
+    .char-counter.danger  { color: var(--danger); }
+
+    /* ===== PREVIEW STRIP ===== */
+    .preview-strip {
+        height: 6px;
+        transition: background var(--transition);
+        border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    }
+</style>
+
+<div class="form-page">
+
+    <!-- Back link + page title -->
+    <div class="form-header">
+        <a href="{% url 'note_list' %}" style="font-size:14px; color:var(--accent); text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-bottom:16px;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            All Notes
+        </a>
+        <h1 class="form-page-title">
+            {% if action == 'Edit' %}Edit Note{% else %}New Note{% endif %}
+        </h1>
+        <p class="form-page-subtitle">
+            {% if action == 'Edit' %}Update your note below.{% else %}Capture your thought.{% endif %}
+        </p>
+    </div>
+
+    <!-- Form card - color preview strip at top -->
+    <div class="form-card" id="form-card">
+
+        <!-- Color preview strip - selected color yahan dikhega -->
+        <div class="preview-strip" id="preview-strip"
+             style="background: {% if note %}{{ note.color }}{% else %}#FFD60A{% endif %};"></div>
+
+        <form method="post" id="note-form">
+            {% csrf_token %}
+
+            <div class="form-card-body">
+
+                <!-- Title field -->
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.title.id_for_label }}">Title</label>
+                    <input
+                        type="text"
+                        name="{{ form.title.html_name }}"
+                        id="{{ form.title.id_for_label }}"
+                        class="form-control"
+                        placeholder="Note title..."
+                        value="{{ form.title.value|default:'' }}"
+                        autocomplete="off"
+                        autofocus
+                    >
+                    {% if form.title.errors %}
+                        <p class="form-error">{{ form.title.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Content field -->
+                <div class="form-group" style="margin-bottom:4px;">
+                    <label class="form-label" for="{{ form.content.id_for_label }}">Content</label>
+                    <textarea
+                        name="{{ form.content.html_name }}"
+                        id="{{ form.content.id_for_label }}"
+                        class="form-control"
+                        placeholder="Write your note here..."
+                        rows="6"
+                        id="content-field"
+                    >{{ form.content.value|default:'' }}</textarea>
+                    <!-- Character counter - JavaScript se update hoga -->
+                    <div class="char-counter" id="char-counter">0 characters</div>
+                    {% if form.content.errors %}
+                        <p class="form-error">{{ form.content.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Color picker section -->
+            <div class="color-section">
+                <span class="color-label">Color</span>
+
+                <!-- Quick color swatches - common sticky note colors -->
+                <div class="color-swatches" id="swatches">
+                    <button type="button" class="color-swatch" data-color="#FFD60A" style="background:#FFD60A;" title="Yellow"></button>
+                    <button type="button" class="color-swatch" data-color="#FF9F0A" style="background:#FF9F0A;" title="Orange"></button>
+                    <button type="button" class="color-swatch" data-color="#FF6B6B" style="background:#FF6B6B;" title="Red"></button>
+                    <button type="button" class="color-swatch" data-color="#FF9EC4" style="background:#FF9EC4;" title="Pink"></button>
+                    <button type="button" class="color-swatch" data-color="#BDE0FE" style="background:#BDE0FE;" title="Blue"></button>
+                    <button type="button" class="color-swatch" data-color="#B5EAD7" style="background:#B5EAD7;" title="Mint"></button>
+                    <button type="button" class="color-swatch" data-color="#C7CEEA" style="background:#C7CEEA;" title="Lavender"></button>
+                    <button type="button" class="color-swatch" data-color="#E8E8E8" style="background:#E8E8E8;" title="Gray"></button>
+                </div>
+
+                <!-- Custom color picker - apni marzi ka color -->
+                <input
+                    type="color"
+                    name="{{ form.color.html_name }}"
+                    id="{{ form.color.id_for_label }}"
+                    class="color-picker-input"
+                    value="{{ form.color.value|default:'#FFD60A' }}"
+                    title="Custom color"
+                >
+            </div>
+
+            <!-- Form action buttons -->
+            <div class="form-actions">
+                <a href="{% url 'note_list' %}" class="btn btn-ghost btn-sm">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    {% if action == 'Edit' %}Save Changes{% else %}Create Note{% endif %}
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ===== Color picker aur swatches logic =====
+    const colorInput   = document.getElementById('{{ form.color.id_for_label }}');
+    const previewStrip = document.getElementById('preview-strip');
+    const swatches     = document.querySelectorAll('.color-swatch');
+    const currentColor = colorInput.value;
+
+    // Active swatch mark karo jo pehle se selected hai
+    function markActive(color) {
+        swatches.forEach(s => {
+            s.classList.toggle('active', s.dataset.color.toLowerCase() === color.toLowerCase());
+        });
+    }
+
+    // Preview strip ka color update karo
+    function applyColor(color) {
+        previewStrip.style.background = color;
+        colorInput.value = color;
+        markActive(color);
+    }
+
+    // Page load pe current color apply karo
+    applyColor(currentColor);
+
+    // Swatch click pe color change karo
+    swatches.forEach(swatch => {
+        swatch.addEventListener('click', () => applyColor(swatch.dataset.color));
+    });
+
+    // Custom color picker se color change karne pe update karo
+    colorInput.addEventListener('input', () => {
+        previewStrip.style.background = colorInput.value;
+        markActive(colorInput.value);
+    });
+
+
+    // ===== Character counter =====
+    const contentField  = document.getElementById('{{ form.content.id_for_label }}');
+    const charCounter   = document.getElementById('char-counter');
+
+    function updateCounter() {
+        const len = contentField.value.length;
+        charCounter.textContent = len === 1 ? '1 character' : `${len} characters`;
+        // 500+ characters pe warning, 1000+ pe danger color
+        charCounter.className = 'char-counter' + (len > 1000 ? ' danger' : len > 500 ? ' warning' : '');
+    }
+
+    // Page load pe bhi count dikhao (edit mode mein pehle se content hoga)
+    updateCounter();
+    contentField.addEventListener('input', updateCounter);
+</script>
+{% endblock %}

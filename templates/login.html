@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<style>
+    /* ===== AUTH PAGE LAYOUT ===== */
+    .auth-page {
+        max-width: 380px;
+        margin: 48px auto 0;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    /* App icon - login page pe bada dikhao -->
+    .auth-app-icon {
+        width: 64px;
+        height: 64px;
+        background: #FFD60A;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 16px rgba(255,214,10,0.4);
+    }
+
+    .auth-title {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        font-size: 15px;
+        color: var(--text-secondary);
+    }
+
+    /* Auth form card -->
+    .auth-card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        padding: 28px;
+    }
+
+    /* Non-field error - wrong credentials wagera -->
+    .auth-error {
+        background: var(--danger-light);
+        border: 1px solid #fecaca;
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #991b1b;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    /* Footer link - register page ka link -->
+    .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .auth-footer a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-footer a:hover { text-decoration: underline; }
+</style>
+
+<div class="auth-page">
+
+    <!-- Header with app icon -->
+    <div class="auth-header">
+        <div class="auth-app-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect x="6" y="4" width="20" height="24" rx="4" fill="rgba(0,0,0,0.15)"/>
+                <rect x="9" y="10" width="14" height="2.5" rx="1.25" fill="rgba(0,0,0,0.5)"/>
+                <rect x="9" y="15" width="10" height="2.5" rx="1.25" fill="rgba(0,0,0,0.5)"/>
+                <rect x="9" y="20" width="6" height="2.5" rx="1.25" fill="rgba(0,0,0,0.5)"/>
+            </svg>
+        </div>
+        <h1 class="auth-title">Sign in to Notes</h1>
+        <p class="auth-subtitle">Welcome back.</p>
+    </div>
+
+    <div class="auth-card">
+
+        <!-- Wrong credentials error message -->
+        {% if form.non_field_errors %}
+            <div class="auth-error">{{ form.non_field_errors|join:" " }}</div>
+        {% endif %}
+
+        <!-- Login form - Django ka built-in LoginView handle karta hai -->
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Username field -->
+            <div class="form-group">
+                <label class="form-label" for="id_username">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    id="id_username"
+                    class="form-control"
+                    placeholder="Your username"
+                    autocomplete="username"
+                    autofocus
+                    required
+                >
+                {% if form.username.errors %}
+                    <p class="form-error">{{ form.username.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Password field -->
+            <div class="form-group" style="margin-bottom:24px;">
+                <label class="form-label" for="id_password">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    class="form-control"
+                    placeholder="Your password"
+                    autocomplete="current-password"
+                    required
+                >
+                {% if form.password.errors %}
+                    <p class="form-error">{{ form.password.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Login ke baad kahan jana hai - hidden field -->
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}">
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">Sign In</button>
+        </form>
+
+    </div>
+
+    <!-- Register link -->
+    <p class="auth-footer">
+        Don't have an account? <a href="{% url 'register' %}">Create one</a>
+    </p>
+
+</div>
+{% endblock %}

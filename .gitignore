@@ -1,0 +1,28 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+env/
+.env/
+
+# Django
+*.sqlite3
+*.log
+local_settings.py
+
+# Environment variables - secret keys yahan hote hain, kabhi commit mat karo
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Static files collected for production
+staticfiles/

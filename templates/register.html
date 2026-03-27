@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<style>
+    /* Auth page styles - login.html se same layout -->
+    .auth-page {
+        max-width: 380px;
+        margin: 48px auto 0;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .auth-app-icon {
+        width: 64px;
+        height: 64px;
+        background: #30D158;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 16px rgba(48,209,88,0.35);
+    }
+
+    .auth-title {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+        font-size: 15px;
+        color: var(--text-secondary);
+    }
+
+    .auth-card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border);
+        padding: 28px;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    .auth-footer a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .auth-footer a:hover { text-decoration: underline; }
+</style>
+
+<div class="auth-page">
+
+    <!-- Header -->
+    <div class="auth-header">
+        <div class="auth-app-icon">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="12" r="5" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>
+                <path d="M6 26c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="rgba(0,0,0,0.5)" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <h1 class="auth-title">Create your account</h1>
+        <p class="auth-subtitle">Start capturing your ideas.</p>
+    </div>
+
+    <div class="auth-card">
+
+        <!-- Registration form - Django ka UserCreationForm use kar rahe hain -->
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- UserCreationForm ke fields manually render karo for better styling -->
+            {% for field in form %}
+                <div class="form-group">
+                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <input
+                        type="{{ field.field.widget.input_type }}"
+                        name="{{ field.html_name }}"
+                        id="{{ field.id_for_label }}"
+                        class="form-control"
+                        {% if field.value %}value="{{ field.value }}"{% endif %}
+                        {% if field.field.required %}required{% endif %}
+                        autocomplete="{% if 'password' in field.html_name %}new-password{% else %}{{ field.html_name }}{% endif %}"
+                    >
+                    <!-- Password requirements hint -->
+                    {% if field.help_text %}
+                        <p class="form-hint">{{ field.help_text }}</p>
+                    {% endif %}
+                    <!-- Validation errors -->
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:8px;">
+                Create Account
+            </button>
+        </form>
+
+    </div>
+
+    <!-- Login link - pehle se account hai -->
+    <p class="auth-footer">
+        Already have an account? <a href="{% url 'login' %}">Sign in</a>
+    </p>
+
+</div>
+{% endblock %}

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sticky Notes{% endblock %}</title>
+
+    <!-- SF Pro font stack - Apple ka default font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f5f5f7;
+            --surface: #ffffff;
+            --surface-secondary: #f5f5f7;
+            --border: rgba(0,0,0,0.08);
+            --border-strong: rgba(0,0,0,0.14);
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #aeaeb2;
+            --accent: #0071e3;
+            --accent-hover: #0077ed;
+            --accent-light: #e8f0fe;
+            --danger: #ff3b30;
+            --danger-light: #fff2f1;
+            --success: #34c759;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        body {
+            font-family: -apple-system, 'SF Pro Display', 'Inter', BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+            height: 52px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .navbar-brand {
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .navbar-brand svg { width: 20px; height: 20px; }
+
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: color var(--transition), background var(--transition);
+            white-space: nowrap;
+        }
+
+        .nav-link:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+
+        .nav-username {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            padding: 6px 12px;
+        }
+
+        .btn-nav-primary {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            background: var(--accent-light);
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background var(--transition), color var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-nav-primary:hover { background: #d2e3fc; color: var(--accent-hover); }
+
+        .btn-nav-logout {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: color var(--transition), background var(--transition);
+        }
+
+        .btn-nav-logout:hover { color: var(--danger); background: var(--danger-light); }
+
+        /* ===== MAIN CONTAINER ===== */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition);
+            padding: 10px 20px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,113,227,0.3); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-secondary {
+            background: var(--surface-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-strong);
+        }
+        .btn-secondary:hover { background: #ebebed; }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover { background: #e0352b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,59,48,0.3); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-strong);
+        }
+        .btn-ghost:hover { background: var(--surface-secondary); color: var(--text-primary); }
+
+        .btn-sm { font-size: 13px; padding: 6px 14px; border-radius: var(--radius-sm); }
+        .btn-lg { font-size: 17px; padding: 14px 28px; border-radius: var(--radius-lg); }
+
+        /* ===== FORM ELEMENTS ===== */
+        .form-group { margin-bottom: 20px; }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            letter-spacing: 0.1px;
+        }
+
+        .form-control {
+            width: 100%;
+            font-family: inherit;
+            font-size: 15px;
+            color: var(--text-primary);
+            background: var(--surface-secondary);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+            -webkit-appearance: none;
+        }
+
+        .form-control:focus {
+            background: var(--surface);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0,113,227,0.15);
+        }
+
+        .form-control::placeholder { color: var(--text-tertiary); }
+
+        textarea.form-control { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+        .form-error {
+            font-size: 12px;
+            color: var(--danger);
+            margin-top: 5px;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        /* ===== ALERT / TOAST ===== */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .alert-error   { background: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
+        .alert-info    { background: var(--accent-light); color: #1e40af; border: 1px solid #bfdbfe; }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+        }
+
+        /* ===== ICON BUTTON ===== */
+        .icon-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .icon-btn:hover { background: #fff; color: var(--text-primary); box-shadow: var(--shadow-md); }
+        .icon-btn.danger:hover { background: var(--danger); color: #fff; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .main { padding: 24px 16px 60px; }
+            .navbar-inner { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navigation bar - Apple style frosted glass effect -->
+<nav class="navbar">
+    <div class="navbar-inner">
+        <!-- App brand / logo -->
+        <a href="{% url 'note_list' %}" class="navbar-brand">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="2" width="14" height="16" rx="3" fill="#FFD60A"/>
+                <rect x="6" y="6" width="8" height="1.5" rx="0.75" fill="#1d1d1f" opacity="0.5"/>
+                <rect x="6" y="9.5" width="6" height="1.5" rx="0.75" fill="#1d1d1f" opacity="0.5"/>
+                <rect x="6" y="13" width="4" height="1.5" rx="0.75" fill="#1d1d1f" opacity="0.5"/>
+            </svg>
+            Notes
+        </a>
+
+        <!-- Nav links - auth state ke hisaab se -->
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'note_list' %}" class="nav-link">All Notes</a></li>
+                <li>
+                    <a href="{% url 'note_create' %}" class="btn-nav-primary">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                            <path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                        New Note
+                    </a>
+                </li>
+                <li><span class="nav-username">{{ user.username }}</span></li>
+                <li>
+                    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-nav-logout">Sign Out</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a href="{% url 'login' %}" class="nav-link">Sign In</a></li>
+                <li><a href="{% url 'register' %}" class="btn-nav-primary">Get Started</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<!-- Main content area -->
+<main class="main">
+
+    <!-- Flash messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+</main>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>
